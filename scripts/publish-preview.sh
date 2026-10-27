@@ -19,6 +19,11 @@ REPO="isaacvj1/actiph-website"
 VISIBILITY="${1:-public}"
 URL="https://isaacvj1.github.io/actiph-website/"
 
+# Larger pushes over HTTPS otherwise fail with "RPC failed; HTTP 400" when git
+# streams them in chunks. Send in one request, over HTTP/1.1. (This repo only.)
+git config http.postBuffer 524288000
+git config http.version HTTP/1.1
+
 if gh repo view "$REPO" >/dev/null 2>&1; then
   git remote get-url origin >/dev/null 2>&1 || git remote add origin "https://github.com/$REPO.git"
   git push -u origin main

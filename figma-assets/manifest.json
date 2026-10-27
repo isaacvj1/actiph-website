@@ -1,0 +1,28 @@
+{
+  "figmaFile": "https://www.figma.com/design/OAFRFJI9S23qvPBKIXjNTx/ActipH-Website",
+  "frame": "2:34 (Frame 1, 1920 x 6210)",
+  "exported": "2026-10-27",
+  "note": "Untouched exports from Figma. Do not edit; re-export from Figma and run scripts/build-assets.sh instead.",
+  "assets": {
+    "hero-photo.png":    { "node": "2:98",  "name": "Sana Grillo-110 1" },
+    "mask-hero.svg":     { "node": "2:101", "name": "Mask group (Rectangle 18)" },
+    "track-photo.jpg":   { "node": "2:97",  "name": "Sana Grillo-74 1" },
+    "mask-track.svg":    { "node": "2:102", "name": "Rectangle 19" },
+    "actiph-logo.png":   { "node": "2:45",  "name": "ED0013_Actiph_Horizontal_RGB 1" },
+    "hyrox-uk.svg":      { "node": "2:60",  "name": "Layer_1 (HYROX - UK)" },
+    "bottle-side.png":   { "node": "2:82",  "name": "Actiph_NEW 3D render 600ml side view_condensation 1" },
+    "bottle-front.png":  { "node": "2:46",  "name": "Actiph_NEW 3D render 600ml_right_reflection 1" },
+    "line.svg":          { "node": "2:124", "name": "Line 1 / Line 2" },
+    "prize-hyrox.png":   { "node": "2:118", "name": "gettyimages-2267247792 1" },
+    "prize-airpods.png": { "node": "2:117", "name": "airpods-3-768x768 1" },
+    "prize-actiph.png":  { "node": "2:113", "name": "actiphseptemberproductshot1080x1350px 1" },
+    "mask-prize.svg":    { "node": "2:109", "name": "Group 5 (Rectangle 5)" },
+    "won-tag.svg":       { "node": "24:28", "name": "Rectangle 20" },
+    "step-circle.svg":   { "node": "24:19", "name": "Ellipse 1" },
+    "sticker-bg.svg":    { "node": "26:66", "name": "Sticker Vector (orange disc)" },
+    "sticker-mask.svg":  { "node": "26:63", "name": "Sticker clippath" },
+    "sticker-band.svg":  { "node": "26:67", "name": "Sticker Vector (white band)" },
+    "sticker-line.svg":  { "node": "26:76", "name": "Sticker Group (rules)" },
+    "sticker-arrow.svg": { "node": "26:79", "name": "Sticker Vector (code tab)" }
+  }
+}

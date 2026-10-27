@@ -1,0 +1,7 @@
+.DS_Store
+.playwright-cli/
+
+# Original Figma exports are large and include licensed photography at full
+# resolution; re-export from Figma when needed. Keep the manifest.
+figma-assets/*
+!figma-assets/manifest.json

@@ -13,7 +13,28 @@
   <link rel="preload" href="assets/fonts/PragmaticaExtended-Bold.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="assets/fonts/Pragmatica-Book.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="assets/css/styles.css">
+  <script>
+    (function (d) {
+      // Fonts can't load from disk (file://), so use the inlined copy there.
+      if (location.protocol === "file:") {
+        var link = d.createElement("link");
+        link.rel = "stylesheet";
+        link.href = "assets/css/fonts-inline.css";
+        d.head.appendChild(link);
+      }
+      // Hide the hero until the intro animation starts; never longer than 3s.
+      if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        var root = d.documentElement;
+        root.classList.add("intro-pending");
+        setTimeout(function () { root.classList.remove("intro-pending"); }, 3000);
+      }
+    })(document);
+  </script>
+  <script src="assets/vendor/gsap.min.js" defer></script>
+  <script src="assets/vendor/ScrollTrigger.min.js" defer></script>
+  <script src="assets/vendor/lenis.min.js" defer></script>
   <script src="assets/js/config.js" defer></script>
+  <script src="assets/js/motion.js" defer></script>
   <script src="assets/js/main.js" defer></script>
 </head>
 <body id="top">
@@ -30,17 +51,27 @@
         <img class="hero__logo" src="assets/img/actiph-logo-420.webp"
              srcset="assets/img/actiph-logo-420.webp 420w, assets/img/actiph-logo-640.webp 640w"
              sizes="210px" width="1458" height="474" alt="ActiPH Alkaline Ionised Water">
-        <span class="hero__hyrox"><img src="assets/img/hyrox-uk.svg" width="261" height="23" alt="HYROX UK"></span>
+        <div class="hero__hyrox-wrap">
+          <a class="hero__hyrox" href="https://hyrox.com/find-my-race/" target="_blank" rel="noopener">
+            <img src="assets/img/hyrox-uk.svg" width="261" height="23" alt="HYROX UK">
+            <span class="visually-hidden">: find a race (opens in a new tab)</span>
+          </a>
+        </div>
       </header>
 
-      <h1 class="hero__title" id="hero-title">WIN<span class="visually-hidden"> with ActiPH and HYROX UK</span></h1>
+      <h1 class="hero__title" id="hero-title" tabindex="-1">
+        <span class="hero__win" aria-hidden="true"><span>W</span><span>I</span><span>N</span></span>
+        <span class="visually-hidden">WIN with ActiPH and HYROX UK</span>
+      </h1>
       <p class="hero__winners">6 WINNERS</p>
       <ul class="hero__prizes">
         <li>x1 Airpods 5</li>
         <li>x2 Hyrox UK Tickets</li>
         <li>x3 3 months’ worth of ActiPH</li>
       </ul>
-      <button class="btn btn--purple hero__cta" type="button" data-open-entry>Enter Code</button>
+      <div class="hero__cta-wrap">
+        <button class="btn btn--purple hero__cta" type="button" data-open-entry>Enter Code</button>
+      </div>
 
       <img class="hero__bottle" src="assets/img/bottle-side-1400.webp"
            srcset="assets/img/bottle-side-800.webp 800w, assets/img/bottle-side-1400.webp 1400w, assets/img/bottle-side-2800.webp 2800w"
@@ -117,15 +148,15 @@
         <h2 class="how__title" id="how-title">How to Enter</h2>
         <ol class="steps">
           <li class="step">
-            <span class="step__badge" aria-hidden="true"><span class="step__num">1</span></span>
+            <span class="step__badge" aria-hidden="true"><span class="step__num"><span>1</span></span></span>
             <p class="step__text">Buy a stickered<br>ActiPH 600ml bottle</p>
           </li>
           <li class="step">
-            <span class="step__badge" aria-hidden="true"><span class="step__num">2</span></span>
+            <span class="step__badge" aria-hidden="true"><span class="step__num"><span>2</span></span></span>
             <p class="step__text"><a href="#enter" data-open-entry>Enter your<br>unique code</a></p>
           </li>
           <li class="step">
-            <span class="step__badge" aria-hidden="true"><span class="step__num">3</span></span>
+            <span class="step__badge" aria-hidden="true"><span class="step__num"><span>3</span></span></span>
             <p class="step__text">Keep receipt,<br>bottle and sticker<br>to claim your prize</p>
           </li>
         </ol>
@@ -143,7 +174,7 @@
   </main>
 
   <!-- Entry form -->
-  <dialog class="entry" id="entry" aria-labelledby="entry-title">
+  <dialog class="entry" id="entry" aria-labelledby="entry-title" data-lenis-prevent>
     <div class="entry__head">
       <h2 class="entry__title" id="entry-title">Enter your code</h2>
       <p class="entry__sub">Find your unique code on the orange WIN sticker on your ActiPH 600ml bottle.</p>
@@ -176,6 +207,31 @@
         <input id="f-phone" name="phone" type="tel" required autocomplete="tel" maxlength="20" aria-describedby="f-phone-err">
         <p class="field__error" id="f-phone-err"></p>
       </div>
+      <div class="field">
+        <label for="f-sport">Sport / activity you practise</label>
+        <select id="f-sport" name="sport" required aria-describedby="f-sport-err">
+          <option value="" selected disabled>Choose one</option>
+          <option>Running</option>
+          <option>Gym / weight training</option>
+          <option>HYROX / functional fitness</option>
+          <option>CrossFit</option>
+          <option>Cycling</option>
+          <option>Swimming</option>
+          <option>Football</option>
+          <option>Other team sport</option>
+          <option>Yoga / Pilates</option>
+          <option>Combat sports</option>
+          <option>Walking / hiking</option>
+          <option value="Other">Other</option>
+          <option>I don't practise a sport</option>
+        </select>
+        <p class="field__error" id="f-sport-err"></p>
+      </div>
+      <div class="field" id="f-sport-other-field" hidden>
+        <label for="f-sportOther">Which sport or activity?</label>
+        <input id="f-sportOther" name="sportOther" type="text" maxlength="60" aria-describedby="f-sportOther-err">
+        <p class="field__error" id="f-sportOther-err"></p>
+      </div>
       <div class="field field--hp" aria-hidden="true">
         <label for="f-website">Website</label>
         <input id="f-website" name="website" type="text" tabindex="-1" autocomplete="off">
@@ -187,7 +243,10 @@
       </div>
 
       <p class="entry__status" role="alert" aria-live="assertive"></p>
-      <button class="btn btn--purple entry__submit" type="submit">Submit entry</button>
+      <button class="btn btn--purple entry__submit" type="submit">
+        <span class="entry__spinner" aria-hidden="true"></span>
+        <span class="entry__submit-label">Submit entry</span>
+      </button>
       <p class="entry__keep">Keep your receipt, bottle and sticker. You'll need all three to claim a prize.</p>
     </form>
 

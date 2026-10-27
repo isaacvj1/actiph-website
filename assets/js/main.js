@@ -1,6 +1,8 @@
 (() => {
   const config = window.ACTIPH_CONFIG || {};
   const isPreview = !config.entryEndpoint;
+  const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const easeOut = "cubic-bezier(0.23, 1, 0.32, 1)";
 
   const dialog = document.getElementById("entry");
   const form = dialog.querySelector(".entry__form");
@@ -27,6 +29,7 @@
   function openEntry() {
     if (dialog.open) return;
     showForm();
+    window.actiphLenis?.stop();
     dialog.showModal();
     form.elements.code.focus();
   }
@@ -53,6 +56,7 @@
   });
 
   dialog.addEventListener("close", () => {
+    window.actiphLenis?.start();
     if (!done.hidden) {
       form.reset();
       showForm();
@@ -82,6 +86,8 @@
     name: (v) => (v.length >= 2 ? "" : "Enter your full name."),
     email: (v, el) => (v && el.validity.valid && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) ? "" : "Enter a valid email address."),
     phone: (v) => (v.replace(/\D/g, "").length >= 8 && /^[+\d\s()-]+$/.test(v) ? "" : "Enter a valid mobile number."),
+    sport: (v) => (v ? "" : "Choose the sport or activity you practise."),
+    sportOther: (v) => (form.elements.sport.value !== "Other" || v.length >= 2 ? "" : "Tell us which sport or activity."),
     terms: (_, el) => (el.checked ? "" : "Please accept the Terms & Conditions to enter."),
   };
 
@@ -102,6 +108,16 @@
     return firstInvalid;
   }
 
+  // "Other" reveals a text box for the sport.
+  const sportOtherField = document.getElementById("f-sport-other-field");
+  const toggleSportOther = () => {
+    const isOther = form.elements.sport.value === "Other";
+    sportOtherField.hidden = !isOther;
+    if (!isOther) setError("sportOther", "");
+  };
+  form.elements.sport.addEventListener("change", toggleSportOther);
+  form.addEventListener("reset", () => setTimeout(toggleSportOther));
+
   // Clear a field's error as soon as it's corrected.
   form.addEventListener("input", (event) => {
     const name = event.target.name;
@@ -119,6 +135,7 @@
     const firstInvalid = validate();
     if (firstInvalid) {
       firstInvalid.focus();
+      shake(firstInvalid);
       return;
     }
 
@@ -127,6 +144,8 @@
       name: form.elements.name.value.trim(),
       email: form.elements.email.value.trim(),
       phone: form.elements.phone.value.trim(),
+      sport: form.elements.sport.value,
+      sportOther: form.elements.sport.value === "Other" ? form.elements.sportOther.value.trim() : "",
       terms: true,
       website: form.elements.website.value, // honeypot: real people leave this empty
     };
@@ -153,6 +172,7 @@
           if (result.error === "invalid_code" || result.error === "code_used") {
             setError("code", " ");
             codeInput.focus();
+            shake(codeInput);
           }
         }
       }
@@ -182,11 +202,39 @@
     }
   }
 
-  function showDone(title, text) {
+  // Crossfade form → confirmation. A little blur blends the two states.
+  async function showDone(title, text) {
     doneTitle.textContent = title;
     doneText.textContent = text;
+    if (!reduceMotion) {
+      await form.animate(
+        [{ opacity: 1, filter: "blur(0)" }, { opacity: 0, filter: "blur(4px)" }],
+        { duration: 160, easing: "ease-out" }
+      ).finished.catch(() => {});
+    }
     form.hidden = true;
     done.hidden = false;
     done.focus();
+    done.animate(
+      reduceMotion
+        ? [{ opacity: 0 }, { opacity: 1 }]
+        : [{ opacity: 0, transform: "translateY(8px)", filter: "blur(4px)" }, { opacity: 1, transform: "none", filter: "blur(0)" }],
+      { duration: 320, easing: easeOut }
+    );
+  }
+
+  // Small horizontal shake to point at the field that needs attention.
+  function shake(el) {
+    if (reduceMotion) return;
+    el.animate(
+      [
+        { transform: "translateX(0)" },
+        { transform: "translateX(-6px)" },
+        { transform: "translateX(5px)" },
+        { transform: "translateX(-3px)" },
+        { transform: "translateX(0)" },
+      ],
+      { duration: 320, easing: "ease-out" }
+    );
   }
 })();

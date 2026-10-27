@@ -6,13 +6,15 @@
  * width. max() floors keep text and tap targets usable on small screens.
  */
 
-@font-face { font-family: "Pragmatica"; src: url("../fonts/Pragmatica-Light.woff2") format("woff2"); font-weight: 300; font-display: swap; }
-@font-face { font-family: "Pragmatica"; src: url("../fonts/Pragmatica-Book.woff2") format("woff2"); font-weight: 400; font-display: swap; }
-@font-face { font-family: "Pragmatica"; src: url("../fonts/Pragmatica-MediumOblique.woff2") format("woff2"); font-weight: 500; font-style: italic; font-display: swap; }
-@font-face { font-family: "Pragmatica"; src: url("../fonts/Pragmatica-Bold.woff2") format("woff2"); font-weight: 700; font-display: swap; }
-@font-face { font-family: "Pragmatica"; src: url("../fonts/Pragmatica-Black.woff2") format("woff2"); font-weight: 900; font-display: swap; }
-@font-face { font-family: "Pragmatica Extended"; src: url("../fonts/PragmaticaExtended-Bold.woff2") format("woff2"); font-weight: 700; font-display: swap; }
-@font-face { font-family: "Pragmatica Extended"; src: url("../fonts/PragmaticaExtended-BlackOblique.woff2") format("woff2"); font-weight: 900; font-style: italic; font-display: swap; }
+/* Pragmatica (ParaType). Uses the copy installed in Font Book when there is
+ * one, otherwise the web font built from it by scripts/build-assets.sh. */
+@font-face { font-family: "Pragmatica"; src: local("Pragmatica Light"), local("Pragmatica-Light"), url("../fonts/Pragmatica-Light.woff2") format("woff2"); font-weight: 300; font-display: swap; }
+@font-face { font-family: "Pragmatica"; src: local("Pragmatica Book"), local("Pragmatica-Book"), url("../fonts/Pragmatica-Book.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Pragmatica"; src: local("Pragmatica Medium Oblique"), local("Pragmatica-MediumOblique"), url("../fonts/Pragmatica-MediumOblique.woff2") format("woff2"); font-weight: 500; font-style: italic; font-display: swap; }
+@font-face { font-family: "Pragmatica"; src: local("Pragmatica Bold"), local("Pragmatica-Bold"), url("../fonts/Pragmatica-Bold.woff2") format("woff2"); font-weight: 700; font-display: swap; }
+@font-face { font-family: "Pragmatica"; src: local("Pragmatica Black"), local("Pragmatica-Black"), url("../fonts/Pragmatica-Black.woff2") format("woff2"); font-weight: 900; font-display: swap; }
+@font-face { font-family: "Pragmatica Extended"; src: local("Pragmatica Extended Bold"), local("PragmaticaExtended-Bold"), url("../fonts/PragmaticaExtended-Bold.woff2") format("woff2"); font-weight: 700; font-display: swap; }
+@font-face { font-family: "Pragmatica Extended"; src: local("Pragmatica Extended Black Oblique"), local("PragmaticaExtended-BlackOblique"), url("../fonts/PragmaticaExtended-BlackOblique.woff2") format("woff2"); font-weight: 900; font-style: italic; font-display: swap; }
 
 :root {
   --purple: #5d2a5e;
@@ -30,16 +32,40 @@
 
   /* One design pixel. cqw resolves against .frame (the 1342px column). */
   --u: calc(100cqw / 1342);
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
 }
 
 *,
 *::before,
 *::after { box-sizing: border-box; }
 
-html { -webkit-text-size-adjust: 100%; }
+html {
+  -webkit-text-size-adjust: 100%;
+  scrollbar-gutter: stable;
+}
 @media (prefers-reduced-motion: no-preference) {
   html { scroll-behavior: smooth; }
 }
+
+/* Lenis smooth scrolling (from lenis/dist/lenis.css) */
+html.lenis,
+html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+.lenis:not(.lenis-autoToggle).lenis-stopped { overflow: clip; }
+.lenis [data-lenis-prevent] { overscroll-behavior: contain; }
+.lenis.lenis-smooth iframe { pointer-events: none; }
+
+/* Hero elements stay hidden until motion.js starts the intro (see index.html). */
+.intro-pending .hero__photo,
+.intro-pending .hero__header > *,
+.intro-pending .hero__win > span,
+.intro-pending .hero__winners,
+.intro-pending .hero__prizes li,
+.intro-pending .hero__cta-wrap,
+.intro-pending .hero__bottle { opacity: 0; }
 
 body {
   margin: 0;
@@ -90,14 +116,29 @@ ul, ol { padding: 0; list-style: none; }
   font-family: var(--font);
   text-decoration: none;
   cursor: pointer;
-  transition: background-color .2s ease, transform .2s ease, filter .2s ease;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    transform 160ms var(--ease-out),
+    background-color 200ms ease,
+    box-shadow 200ms ease,
+    filter 200ms ease;
 }
-.btn:hover { transform: translateY(-2px); }
-.btn:active { transform: translateY(0); }
+.btn:active { transform: scale(.97); }
 .btn--purple { background: var(--purple); }
-.btn--purple:hover { background: var(--purple-hover); }
 .btn--blue { background: var(--blue); }
-.btn--blue:hover { filter: brightness(1.06); }
+
+@media (hover: hover) and (pointer: fine) {
+  .btn:hover { transform: translateY(-2px); }
+  .btn:hover:active { transform: translateY(0) scale(.97); }
+  .btn--purple:hover {
+    background: var(--purple-hover);
+    box-shadow: 0 14px 28px -14px rgba(93, 42, 94, .7);
+  }
+  .btn--blue:hover {
+    filter: brightness(1.05);
+    box-shadow: 0 14px 28px -14px rgba(68, 140, 168, .7);
+  }
+}
 .btn--lg {
   height: max(54px, calc(110 * var(--u)));
   font-size: max(17px, calc(40 * var(--u)));
@@ -128,8 +169,10 @@ ul, ol { padding: 0; list-style: none; }
   max-width: none;
   height: auto;
   pointer-events: none;
-  -webkit-mask: url("../img/mask-hero.svg") no-repeat;
-          mask: url("../img/mask-hero.svg") no-repeat;
+  will-change: transform;
+  /* Figma mask (Rectangle 18): opaque to 595px, transparent by 1175px of a 1341 × 1994 box. */
+  -webkit-mask: linear-gradient(#000 29.863%, transparent 58.951%) no-repeat;
+          mask: linear-gradient(#000 29.863%, transparent 58.951%) no-repeat;
   -webkit-mask-size: calc(1341 * var(--u)) calc(1994 * var(--u));
           mask-size: calc(1341 * var(--u)) calc(1994 * var(--u));
   -webkit-mask-position: calc(449 * var(--u)) calc(1342 * var(--u));
@@ -155,6 +198,18 @@ ul, ol { padding: 0; list-style: none; }
   height: max(32px, calc(78 * var(--u)));
   border-radius: 999px;
   background: #000;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 160ms var(--ease-out), box-shadow 200ms ease, background-color 200ms ease;
+}
+.hero__hyrox:active { transform: scale(.97); }
+.hero__hyrox:focus-visible { outline-color: #fff; }
+@media (hover: hover) and (pointer: fine) {
+  .hero__hyrox:hover {
+    transform: translateY(-2px);
+    background: #1c1c1c;
+    box-shadow: 0 14px 26px -14px rgba(0, 0, 0, .65);
+  }
+  .hero__hyrox:hover:active { transform: translateY(0) scale(.97); }
 }
 .hero__hyrox img {
   width: max(104px, calc(261 * var(--u)));
@@ -162,12 +217,15 @@ ul, ol { padding: 0; list-style: none; }
 }
 
 .hero__title {
+  outline: none;
   margin-top: calc(490 * var(--u));
   font-family: var(--font-ext);
   font-weight: 700;
   font-size: max(84px, calc(300 * var(--u)));
   line-height: .5833; /* 175px at 300px */
 }
+.hero__win { display: block; }
+.hero__win > span { display: inline-block; }
 
 .hero__winners {
   display: flex;
@@ -194,14 +252,31 @@ ul, ol { padding: 0; list-style: none; }
   background: url("../img/line.svg") center calc(2.5 * var(--u)) / 100% 1px no-repeat;
 }
 
+.hero__cta-wrap { margin-top: max(20px, calc(45.5 * var(--u))); }
 .hero__cta {
+  position: relative;
+  overflow: hidden;
   width: max(200px, calc(364 * var(--u)));
   height: max(50px, calc(66 * var(--u)));
-  margin-top: max(20px, calc(45.5 * var(--u)));
   font-weight: 700;
   font-size: max(18px, calc(32 * var(--u)));
 }
 .hero__cta:focus-visible { outline-color: #fff; }
+/* Light sweep across the button on hover. */
+.hero__cta::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 30%, rgba(255, 255, 255, .28) 50%, transparent 70%);
+  transform: translateX(-120%);
+  pointer-events: none;
+}
+@media (hover: hover) and (pointer: fine) {
+  .hero__cta:hover::after {
+    transform: translateX(120%);
+    transition: transform 800ms var(--ease-out);
+  }
+}
 
 .hero__bottle {
   width: 100%;
@@ -219,12 +294,9 @@ ul, ol { padding: 0; list-style: none; }
   height: calc(1431 * var(--u));
   margin-top: calc(-238 * var(--u));
   overflow: hidden;
-  -webkit-mask: url("../img/mask-track.svg") no-repeat;
-          mask: url("../img/mask-track.svg") no-repeat;
-  -webkit-mask-size: calc(1466 * var(--u)) calc(1713 * var(--u));
-          mask-size: calc(1466 * var(--u)) calc(1713 * var(--u));
-  -webkit-mask-position: calc(-60 * var(--u)) 0;
-          mask-position: calc(-60 * var(--u)) 0;
+  /* Figma "Mask group" (Rectangle 19, 1466 × 1713): opaque to 964px, transparent by 1431px. */
+  -webkit-mask-image: linear-gradient(#000 calc(964.45 * var(--u)), transparent calc(1430.97 * var(--u)));
+          mask-image: linear-gradient(#000 calc(964.45 * var(--u)), transparent calc(1430.97 * var(--u)));
 }
 .track img {
   position: absolute;
@@ -232,6 +304,7 @@ ul, ol { padding: 0; list-style: none; }
   top: calc(-609.4 * var(--u));
   width: 100%;
   height: auto;
+  will-change: transform;
 }
 
 /* ---------- Prizes ---------- */
@@ -285,6 +358,16 @@ ul, ol { padding: 0; list-style: none; }
   width: 132.6%;
   max-width: none;
   height: auto;
+}
+/* Gentle float once the AirPods have landed (class added by motion.js). */
+.prize__card--airpods img.is-floating { animation: float 4.2s ease-in-out infinite alternate; }
+@keyframes float {
+  from { transform: translateY(0) rotate(0deg); }
+  to { transform: translateY(-3.5%) rotate(-1.5deg); }
+}
+@media (hover: hover) and (pointer: fine) {
+  .prize__card--photo img { transition: transform 700ms var(--ease-out); }
+  .prize:hover .prize__card--photo img { transform: scale(1.05); }
 }
 .prize__label {
   margin-top: max(10px, calc(25 * var(--u)));
@@ -357,9 +440,10 @@ ul, ol { padding: 0; list-style: none; }
   justify-content: center;
   column-gap: calc(51 * var(--u));
   margin-top: max(24px, calc(51.7 * var(--u)));
+  translate: calc(-1.5 * var(--u)) 0;   /* Group 11 sits 1.5px left of the prize grid */
 }
 .step { --b: max(64px, calc(105 * var(--u))); }
-.step:nth-child(1) { --dx: -14; }
+.step:nth-child(1) { --dx: -13; }
 .step:nth-child(2),
 .step:nth-child(3) { --dx: -22; }
 .step__badge {
@@ -374,7 +458,8 @@ ul, ol { padding: 0; list-style: none; }
   position: absolute;
   left: 50%;
   top: 50%;
-  transform: translate(calc(-50% + var(--dx) / 105 * var(--b)), -50%);
+  /* `translate`, not `transform`, so motion.js can animate transform on top. */
+  translate: calc(-50% + var(--dx) / 105 * var(--b)) calc(-50% - 2 / 105 * var(--b));
   color: var(--blue);
   font-family: var(--font-ext);
   font-style: italic;
@@ -382,13 +467,18 @@ ul, ol { padding: 0; list-style: none; }
   font-size: calc(var(--b) * 1.219);  /* 128px on a 105px circle */
   line-height: normal;
 }
+.step__num > span { display: inline-block; }  /* animated by motion.js */
 .step__text {
   margin-top: max(12px, calc(30 * var(--u)));
   font-size: max(16px, calc(32 * var(--u)));
   line-height: 1;
   letter-spacing: -.05em;
 }
-.step__text a { color: inherit; text-decoration: none; }
+.step__text a {
+  color: inherit;
+  text-decoration: none;
+  transition: color 200ms ease;
+}
 .step__text a:hover { color: var(--purple); }
 
 .how__note {
@@ -414,7 +504,7 @@ ul, ol { padding: 0; list-style: none; }
 
 @container frame (max-width: 640px) {
   .hero__header { grid-template-columns: auto 1fr; }
-  .hero__hyrox { justify-self: end; }
+  .hero__hyrox-wrap { justify-self: end; }
 
   .prizes { padding-bottom: 32px; }
   .prizes__grid {
@@ -482,14 +572,45 @@ ul, ol { padding: 0; list-style: none; }
   border: 0;
   border-radius: 28px;
   overflow: auto;
+  overscroll-behavior: contain;
   color: var(--ink);
   background: #fff;
   box-shadow: 0 30px 80px rgba(35, 15, 36, .35);
+  /* Closing: quick. */
+  opacity: 0;
+  transform: translateY(16px) scale(.97);
+  transition:
+    opacity 160ms var(--ease-out),
+    transform 160ms var(--ease-out),
+    overlay 160ms allow-discrete,
+    display 160ms allow-discrete;
+}
+/* Opening: a touch slower than closing. */
+.entry[open] {
+  opacity: 1;
+  transform: none;
+  transition-duration: 280ms;
+}
+@starting-style {
+  .entry[open] { opacity: 0; transform: translateY(16px) scale(.97); }
 }
 .entry::backdrop {
+  background: rgba(36, 18, 38, 0);
+  -webkit-backdrop-filter: blur(0);
+          backdrop-filter: blur(0);
+  transition:
+    background-color 200ms ease,
+    backdrop-filter 200ms ease,
+    overlay 200ms allow-discrete,
+    display 200ms allow-discrete;
+}
+.entry[open]::backdrop {
   background: rgba(36, 18, 38, .55);
   -webkit-backdrop-filter: blur(4px);
           backdrop-filter: blur(4px);
+}
+@starting-style {
+  .entry[open]::backdrop { background: rgba(36, 18, 38, 0); backdrop-filter: blur(0); }
 }
 
 .entry__head {
@@ -547,24 +668,38 @@ ul, ol { padding: 0; list-style: none; }
   font-weight: 700;
   font-size: 15px;
 }
-.field input:not([type="checkbox"]) {
+.field input:not([type="checkbox"]),
+.field select {
   width: 100%;
   height: 52px;
   padding: 0 18px;
   border: 2px solid #d4e9f1;
   border-radius: 14px;
-  background: #f5fafc;
+  background-color: #f5fafc;
   color: #1d1d1d;
   font-family: var(--font);
   font-size: 17px;
-  transition: border-color .15s ease, box-shadow .15s ease;
+  transition: border-color .15s ease, outline-color .15s ease;
 }
-.field input:not([type="checkbox"]):focus {
+.field select {
+  padding-right: 48px;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='9' viewBox='0 0 14 9'%3E%3Cpath d='M1.5 1.5l5.5 5.5 5.5-5.5' fill='none' stroke='%235d2a5e' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 18px center;
+  cursor: pointer;
+}
+.field select:invalid { color: #8a9aa1; }   /* "Choose one" placeholder */
+.field select option { color: #1d1d1d; }
+.field input:not([type="checkbox"]):focus,
+.field select:focus {
   border-color: var(--purple);
-  outline: none;
-  box-shadow: 0 0 0 4px rgba(93, 42, 94, .15);
+  outline: 4px solid rgba(93, 42, 94, .16);
+  outline-offset: 0;
 }
-.field input[aria-invalid="true"] { border-color: var(--error); }
+.field input[aria-invalid="true"],
+.field select[aria-invalid="true"] { border-color: var(--error); }
+#f-sport-other-field { animation: message-in 220ms var(--ease-out); }
 #f-code {
   font-family: var(--font-ext);
   font-weight: 700;
@@ -578,8 +713,12 @@ ul, ol { padding: 0; list-style: none; }
   margin-top: 6px;
   color: var(--error);
   font-size: 14px;
+  animation: message-in 220ms var(--ease-out);
 }
 .field__error:empty { display: none; }
+@keyframes message-in {
+  from { opacity: 0; transform: translateY(-4px); }
+}
 
 .field--check {
   display: grid;
@@ -612,16 +751,29 @@ ul, ol { padding: 0; list-style: none; }
   color: #8c1d18;
   font-size: 15px;
   line-height: 1.4;
+  animation: message-in 220ms var(--ease-out);
 }
 .entry__status:empty { display: none; }
 
 .entry__submit {
+  gap: 10px;
   width: 100%;
   height: 56px;
   font-weight: 700;
   font-size: 18px;
 }
-.entry__submit[aria-busy="true"] { opacity: .7; cursor: progress; }
+.entry__submit[aria-busy="true"] { cursor: progress; }
+.entry__spinner {
+  display: none;
+  width: 18px;
+  height: 18px;
+  border: 2.5px solid rgba(255, 255, 255, .35);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 600ms linear infinite;
+}
+.entry__submit[aria-busy="true"] .entry__spinner { display: block; }
+@keyframes spin { to { transform: rotate(360deg); } }
 
 .entry__keep {
   font-size: 14px;
@@ -659,6 +811,23 @@ ul, ol { padding: 0; list-style: none; }
   .entry__form { padding: 20px 22px 24px; }
 }
 
+/* Reduced motion: keep fades, drop movement. */
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { transition: none !important; }
+  .btn,
+  .btn:hover,
+  .btn:active,
+  .hero__hyrox,
+  .hero__hyrox:hover,
+  .hero__hyrox:active { transform: none; }
+  .hero__cta::after { display: none; }
+  .prize__card--airpods img.is-floating { animation: none; }
+  .prize:hover .prize__card--photo img { transform: none; }
+  .entry,
+  .entry[open] { transform: none; }
+  @starting-style {
+    .entry[open] { transform: none; }
+  }
+  .field__error,
+  .entry__status { animation-name: fade-in; }
+  @keyframes fade-in { from { opacity: 0; } }
 }

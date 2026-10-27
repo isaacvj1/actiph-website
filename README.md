@@ -10,8 +10,11 @@ It's plain HTML, CSS and JavaScript with no build step, so it can be hosted anyw
 index.html            the campaign page
 terms.html            Terms & Conditions (placeholder until the approved text is supplied)
 assets/css/styles.css all styles
+assets/css/fonts-inline.css  Pragmatica inlined, loaded only when the page is opened from disk
 assets/js/config.js   entry backend settings
 assets/js/main.js     entry form behaviour
+assets/js/motion.js   smooth scrolling, hero intro and scroll animations
+assets/vendor/        GSAP 3.15.0 + ScrollTrigger (GSAP standard licence), Lenis 1.3.26 (MIT)
 assets/img/           web-optimised images generated from Figma exports
 assets/fonts/         Pragmatica web fonts (WOFF2, Latin subset)
 figma-assets/         original Figma exports (only manifest.json is committed)
@@ -24,7 +27,15 @@ scripts/build-assets.sh  regenerates assets/img and assets/fonts
 python3 -m http.server 8765
 ```
 
-Then open http://localhost:8765. Opening `index.html` directly from disk won't work properly, because browsers block the image masks on `file://` pages.
+Then open http://localhost:8765. Opening `index.html` straight from disk also works: browsers block font files on `file://` pages, so the page loads `fonts-inline.css` instead in that case.
+
+## Motion
+
+- Smooth scrolling uses Lenis on mouse wheels and trackpads; touch devices keep their native scrolling.
+- The hero plays a one-off intro (under 2 seconds). Sections below animate in once as they scroll into view, and the model and track photos have subtle parallax.
+- Only `transform`, `opacity` and one `clip-path` wipe are animated. Easing is a strong ease-out (`expo.out` in GSAP, `cubic-bezier(0.23, 1, 0.32, 1)` in CSS).
+- With "reduce motion" turned on in the operating system, smooth scrolling, movement and parallax are off and sections just fade in.
+- If the scripts fail to load, the hero still appears after 3 seconds and the rest of the page is visible as normal.
 
 ## Responsive behaviour
 
@@ -44,8 +55,11 @@ The "Enter Code" form currently runs in **preview mode**: it validates input and
 The form sends `POST <entryEndpoint>` with this JSON body:
 
 ```json
-{ "code": "AB12C", "name": "Maria Borg", "email": "maria@example.com", "phone": "+356 9912 3456", "terms": true, "website": "" }
+{ "code": "AB12C", "name": "Maria Borg", "email": "maria@example.com", "phone": "+356 9912 3456",
+  "sport": "Running", "sportOther": "", "terms": true, "website": "" }
 ```
+
+`sport` is one of the dropdown options in `index.html`. When it is `"Other"`, `sportOther` holds what the person typed; otherwise it is empty.
 
 The backend must respond with JSON:
 

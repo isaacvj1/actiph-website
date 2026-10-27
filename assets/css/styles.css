@@ -132,11 +132,11 @@ ul, ol { padding: 0; list-style: none; }
   .btn:hover:active { transform: translateY(0) scale(.97); }
   .btn--purple:hover {
     background: var(--purple-hover);
-    box-shadow: 0 14px 28px -14px rgba(93, 42, 94, .7);
+    box-shadow: 0 14px 28px -14px rgba(20, 12, 20, .45);
   }
   .btn--blue:hover {
     filter: brightness(1.05);
-    box-shadow: 0 14px 28px -14px rgba(68, 140, 168, .7);
+    box-shadow: 0 14px 28px -14px rgba(20, 30, 36, .35);
   }
 }
 .btn--lg {
@@ -536,19 +536,65 @@ ul, ol { padding: 0; list-style: none; }
 }
 .doc__logo img { width: 150px; height: auto; }
 .doc__title {
-  margin: 32px 0 20px;
+  margin: 32px 0 8px;
   color: var(--purple);
   font-family: var(--font-ext);
   font-weight: 700;
   font-size: clamp(26px, 5vw, 40px);
   line-height: 1.1;
 }
-.doc__body { font-size: 17px; line-height: 1.6; }
-.doc__body p + p { margin-top: 1em; }
-.doc__pending {
-  padding: 16px 18px;
-  border-radius: 14px;
+.doc__lead { margin-bottom: 24px; font-size: 18px; }
+.doc__draft {
+  margin-bottom: 24px;
+  padding: 12px 16px;
+  border: 1px solid #f6cfae;
+  border-radius: 12px;
+  background: #fff3e8;
+  color: #7a3a06;
+  font-size: 15px;
+}
+.doc__toc {
+  margin-bottom: 32px;
+  padding: 18px 22px;
+  border-radius: 16px;
   background: #f2f8fb;
+}
+.doc__toc ol {
+  columns: 2 220px;
+  column-gap: 32px;
+  padding-left: 1.4em;
+  list-style: decimal;
+  font-size: 15px;
+  line-height: 1.8;
+}
+.doc__toc a { color: var(--purple); }
+.doc__body { font-size: 16px; line-height: 1.6; }
+.doc__body section { scroll-margin-top: 24px; }
+.doc__body section + section { margin-top: 32px; }
+.doc__body h2 {
+  margin-bottom: 12px;
+  color: var(--purple);
+  font-weight: 700;
+  font-size: 19px;
+  line-height: 1.3;
+}
+.doc__body p + p,
+.doc__body p + ul,
+.doc__body ul + p { margin-top: .75em; }
+.doc__body ul { padding-left: 1.2em; }
+.doc__body li + li { margin-top: .35em; }
+.doc__body a { color: var(--purple); }
+.doc__small {
+  margin-top: 32px;
+  color: #6b6b6b;
+  font-size: 14px;
+}
+.doc__small + .doc__small { margin-top: 8px; }
+mark.tbc {
+  padding: 0 .2em;
+  border-radius: 4px;
+  background: #ffe9a8;
+  color: inherit;
 }
 .doc__back {
   margin-top: 36px;

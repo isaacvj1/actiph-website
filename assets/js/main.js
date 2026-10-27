@@ -88,7 +88,7 @@
     phone: (v) => (v.replace(/\D/g, "").length >= 8 && /^[+\d\s()-]+$/.test(v) ? "" : "Enter a valid mobile number."),
     sport: (v) => (v ? "" : "Choose the sport or activity you practise."),
     sportOther: (v) => (form.elements.sport.value !== "Other" || v.length >= 2 ? "" : "Tell us which sport or activity."),
-    terms: (_, el) => (el.checked ? "" : "Please accept the Terms & Conditions to enter."),
+    terms: (_, el) => (el.checked ? "" : "Please confirm your age and accept the Terms & Conditions to enter."),
   };
 
   function setError(name, message) {

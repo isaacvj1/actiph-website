@@ -86,6 +86,6 @@ The backend must:
 
 ## Before launch
 
-- Replace the placeholder in `terms.html` with the approved T&Cs and a privacy notice (the form collects personal data).
+- Confirm every highlighted item in `terms.html` (`<mark class="tbc">`), then remove the highlights and the draft notice. Have the Terms and Privacy Notice reviewed legally before launch.
 - Confirm VJSCL's Pragmatica licence covers web use. ParaType sells web licences separately from desktop licences.
 - Confirm the licence for the Getty image used on the HYROX tickets card covers web use.

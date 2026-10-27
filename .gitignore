@@ -6,3 +6,6 @@
 figma-assets/*
 !figma-assets/manifest.json
 !figma-assets/hero-group.svg
+
+# Design checker settings (local tooling)
+.impeccable/

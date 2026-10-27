@@ -558,6 +558,7 @@ ul, ol { padding: 0; list-style: none; }
   padding: 18px 22px;
   border-radius: 16px;
   background: #f2f8fb;
+  color: #2c4b57;   /* deep blue, not grey, on the blue tint */
 }
 .doc__toc ol {
   columns: 2 220px;
@@ -594,7 +595,7 @@ mark.tbc {
   padding: 0 .2em;
   border-radius: 4px;
   background: #ffe9a8;
-  color: inherit;
+  color: #4a3300;   /* dark amber on the yellow highlight */
 }
 .doc__back {
   margin-top: 36px;

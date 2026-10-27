@@ -9,6 +9,12 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
+# Keep a copy of everything this prints, so problems can be diagnosed afterwards.
+LOG=".publish-preview.log"
+exec > >(tee "$LOG") 2>&1
+trap 'echo "FAILED at line $LINENO. Full output saved in $PWD/$LOG"' ERR
+echo "Publishing preview $(date '+%Y-%m-%d %H:%M:%S')"
+
 REPO="isaacvj1/actiph-website"
 VISIBILITY="${1:-public}"
 URL="https://isaacvj1.github.io/actiph-website/"

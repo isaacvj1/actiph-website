@@ -9,3 +9,6 @@ figma-assets/*
 
 # Design checker settings (local tooling)
 .impeccable/
+
+# Output of scripts/publish-preview.sh
+.publish-preview.log

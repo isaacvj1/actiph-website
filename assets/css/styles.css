@@ -160,23 +160,18 @@ ul, ol { padding: 0; list-style: none; }
 }
 .hero > :not(.hero__photo) { position: relative; z-index: 1; }
 
+/* Figma "Mask group" (2:101) exported as rendered: the model photo with its
+   fade mask and the designer's Noise effect (grain) already applied. */
 .hero__photo {
   position: absolute;
   z-index: 0;
-  left: calc(-449 * var(--u));
-  top: calc(-1342 * var(--u));
-  width: calc(2309 * var(--u));
+  left: 0;
+  top: 0;
+  width: calc(1341 * var(--u));
   max-width: none;
   height: auto;
   pointer-events: none;
   will-change: transform;
-  /* Figma mask (Rectangle 18): opaque to 595px, transparent by 1175px of a 1341 × 1994 box. */
-  -webkit-mask: linear-gradient(#000 29.863%, transparent 58.951%) no-repeat;
-          mask: linear-gradient(#000 29.863%, transparent 58.951%) no-repeat;
-  -webkit-mask-size: calc(1341 * var(--u)) calc(1994 * var(--u));
-          mask-size: calc(1341 * var(--u)) calc(1994 * var(--u));
-  -webkit-mask-position: calc(449 * var(--u)) calc(1342 * var(--u));
-          mask-position: calc(449 * var(--u)) calc(1342 * var(--u));
 }
 
 .hero__header {

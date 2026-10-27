@@ -22,7 +22,11 @@ webp() {
   done
 }
 
-webp hero-photo.png    hero-photo    1200 2305
+# The hero model is its whole Figma mask group with the fade and the designer's
+# Noise effect (grain) baked in; see "Hero grain" in README.md.
+for w in 700 1341; do
+  cwebp -quiet -q 78 -m 6 -alpha_q 100 -resize "$w" 0 "$SRC/hero-group.png" -o "$IMG/hero-group-$w.webp"
+done
 webp track-photo.jpg   track-photo   800 1400 2305
 webp bottle-side.png   bottle-side   800 1400 2800
 webp bottle-front.png  bottle-front  500 900 1539

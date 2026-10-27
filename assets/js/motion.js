@@ -64,7 +64,7 @@
   // Skip it if the 3s failsafe in index.html already revealed the hero.
   if (root.classList.contains("intro-pending")) {
     gsap.timeline({ defaults: { ease, duration: 1 } })
-      .from(".hero__photo", { opacity: 0, scale: 1.06, transformOrigin: "50% 40%", duration: 1.8 }, 0)
+      .from(".hero__photo", { opacity: 0, scale: 1.06, transformOrigin: "60% 25%", duration: 1.8 }, 0)
       .from(".hero__header > *", { opacity: 0, y: -14, stagger: 0.08, duration: 0.9 }, 0.15)
       .from(".hero__win > span", { opacity: 0, yPercent: 30, filter: "blur(12px)", stagger: 0.09, duration: 1.1, clearProps: "filter" }, 0.3)
       .from(".hero__winners", { opacity: 0, y: 16, scale: 0.96, duration: 0.8 }, 0.65)

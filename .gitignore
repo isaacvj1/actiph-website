@@ -5,3 +5,4 @@
 # resolution; re-export from Figma when needed. Keep the manifest.
 figma-assets/*
 !figma-assets/manifest.json
+!figma-assets/hero-group.svg

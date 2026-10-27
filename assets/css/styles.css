@@ -649,8 +649,8 @@ ul, ol { padding: 0; list-style: none; }
 }
 .entry__preview {
   padding: 12px 14px;
-  border-left: 4px solid var(--orange);
-  border-radius: 8px;
+  border: 1px solid #f6cfae;
+  border-radius: 12px;
   background: #fff3e8;
   color: #7a3a06;
   font-size: 14px;

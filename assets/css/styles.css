@@ -160,14 +160,14 @@ ul, ol { padding: 0; list-style: none; }
 }
 .hero > :not(.hero__photo) { position: relative; z-index: 1; }
 
-/* Figma "Mask group" (2:101) exported as rendered: the model photo with its
-   fade mask and the designer's Noise effect (grain) already applied. */
+/* Figma "Mask group" 37:15 (Rectangle 22 at frame 292, 196): the model photo
+   with its fade already applied by build-assets.sh. */
 .hero__photo {
   position: absolute;
   z-index: 0;
-  left: 0;
-  top: 0;
-  width: calc(1341 * var(--u));
+  left: calc(3 * var(--u));
+  top: calc(109 * var(--u));
+  width: calc(1339 * var(--u));
   max-width: none;
   height: auto;
   pointer-events: none;
@@ -279,6 +279,65 @@ ul, ol { padding: 0; list-style: none; }
   margin-top: max(16px, calc(68 * var(--u)));
 }
 
+/* ---------- Campaign state (set on <html> by boot.js) ---------- */
+
+html:not([data-campaign="open"]) [data-when="open"],
+html:not([data-campaign="upcoming"]) [data-when="upcoming"],
+html:not([data-campaign="closed"]) [data-when="closed"] { display: none !important; }
+
+.countdown { display: grid; justify-items: center; gap: max(10px, calc(16 * var(--u))); }
+.countdown__label {
+  font-weight: 700;
+  font-size: max(16px, calc(28 * var(--u)));
+}
+.countdown__units {
+  display: flex;
+  justify-content: center;
+  gap: max(8px, calc(14 * var(--u)));
+}
+.countdown__unit {
+  display: grid;
+  justify-items: center;
+  gap: max(4px, calc(8 * var(--u)));
+  width: max(64px, calc(110 * var(--u)));
+  padding: max(10px, calc(18 * var(--u))) 0 max(8px, calc(14 * var(--u)));
+  border: 1px solid rgba(255, 255, 255, .45);
+  border-radius: max(12px, calc(21 * var(--u)));
+  background: linear-gradient(to left, rgba(204, 222, 229, .28), rgba(236, 243, 245, .28));
+}
+.countdown__num {
+  font-family: var(--font-ext);
+  font-weight: 700;
+  font-size: max(26px, calc(48 * var(--u)));
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.countdown__name {
+  font-weight: 700;
+  font-size: max(11px, calc(15 * var(--u)));
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.countdown__date { font-size: max(14px, calc(24 * var(--u))); }
+
+.hero__closed {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: max(220px, calc(420 * var(--u)));
+  height: max(50px, calc(66 * var(--u)));
+  border: 2px solid rgba(255, 255, 255, .7);
+  border-radius: 999px;
+  background: rgba(93, 42, 94, .82);
+  color: #fff;
+  font-family: var(--font);
+  font-weight: 700;
+  font-size: max(17px, calc(30 * var(--u)));
+  cursor: pointer;
+  transition: transform 160ms var(--ease-out);
+}
+.hero__closed:active { transform: scale(.97); }
+
 /* ---------- Lower card ---------- */
 
 .lower { background: #fff; border-radius: 0 0 max(28px, calc(131 * var(--u))) max(28px, calc(131 * var(--u))); }
@@ -345,6 +404,7 @@ ul, ol { padding: 0; list-style: none; }
   height: 100%;
   object-fit: cover;
 }
+.prize__card--photo .prize__img--hyrox { object-position: 40.8% 50%; }
 .prize__card--airpods { background: var(--blue); }
 .prize__card--airpods img {
   position: absolute;
@@ -848,9 +908,29 @@ mark.tbc {
   font-size: 17px;
 }
 
+.entry__captcha { min-height: 65px; }
+
+/* Opening soon / closed notice */
+.notice { width: min(480px, calc(100% - 24px)); }
+.notice__body {
+  display: grid;
+  justify-items: center;
+  gap: 24px;
+  padding: 28px 32px 32px;
+  text-align: center;
+}
+.notice__text { font-size: 17px; line-height: 1.5; }
+.notice__ok {
+  min-width: 160px;
+  height: 52px;
+  font-weight: 700;
+  font-size: 17px;
+}
+
 @media (max-width: 480px) {
   .entry__head { padding: 26px 22px 22px; }
   .entry__form { padding: 20px 22px 24px; }
+  .notice__body { padding: 24px 22px 26px; }
 }
 
 /* Reduced motion: keep fades, drop movement. */

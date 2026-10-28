@@ -48,14 +48,9 @@ The designer is still working on the file. When something changes:
 1. Re-export the changed layer from Figma into `figma-assets/` with the same file name. `figma-assets/manifest.json` lists the Figma node each file comes from.
 2. Run `./scripts/build-assets.sh`. It needs `cwebp` (`brew install webp`), Python with `fonttools` and `brotli`, and the Pragmatica fonts installed in `~/Library/Fonts`.
 
-## Hero grain
+## Hero model
 
-The model photo has a Figma Noise effect (grain) on its mask group. Figma's PNG export of that group flattens the transparent areas onto grey, so `figma-assets/hero-group.png` is rendered locally instead from Figma's SVG export of the group (`figma-assets/hero-group.svg`, which holds the fade mask and the noise filter) with the original photo put back in:
-
-1. Re-export `hero-photo.png` (node 2:98) and `hero-group.svg` (node 2:101, SVG) from Figma if they changed.
-2. Serve the project (`python3 -m http.server 8765`) and open `scripts/render-hero-group.html` in a browser window of exactly 1341 × 1994 at a device pixel ratio of 2.25.
-3. Screenshot the `<svg>` with a transparent background and scale it down to 1341 × 1994 with a box filter. Rendering at 2.25× matches the grain strength Figma shows; at 1× the browser draws the noise much harder.
-4. Save it as `figma-assets/hero-group.png` and run `./scripts/build-assets.sh`.
+The model is Figma's "Mask group" 37:15: the photo `claire azzopardi-39 1` (node 37:2) clipped to Rectangle 22 and faded out by Rectangle 21's gradient. Figma's PNG export of the group flattens the transparent areas onto grey, so `build-assets.sh` applies the same masks itself (positions and gradient stops are noted in the script) to `figma-assets/hero-model-photo.png`. If the designer moves the photo or changes either mask, update those numbers in the script; if only the photo changes, re-export node 37:2 and rebuild.
 
 ## Connecting the entry backend
 

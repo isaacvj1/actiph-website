@@ -4,9 +4,9 @@
   "exported": "2026-10-27",
   "note": "Untouched exports from Figma. Do not edit; re-export from Figma and run scripts/build-assets.sh instead.",
   "assets": {
-    "hero-group.svg":    { "node": "2:101", "name": "Mask group: Figma's SVG export with the Rectangle 18 fade and the Noise effect filter (photo fill stripped)" },
-    "hero-group.png":    { "node": "2:101", "name": "Mask group rendered from hero-group.svg + hero-photo.png by scripts/render-hero-group.html at 2.25x, box-scaled to 1341 x 1994 (Figma's own PNG export flattens transparency onto grey)" },
-    "hero-photo.png":    { "node": "2:98",  "name": "Sana Grillo-110 1 (raw photo, input to hero-group.png)" },
+    "hero-model-photo.png":       { "node": "37:2",  "name": "claire azzopardi-39 1 (raw photo; masked in build-assets.sh)" },
+    "hero-model-mask-rect22.svg": { "node": "37:11", "name": "Rectangle 22, clip of Mask group 37:15 (reference)" },
+    "hero-model-mask-rect21.svg": { "node": "37:3",  "name": "Rectangle 21, fade of Mask group 37:10 (reference)" },
     "mask-hero.svg":     { "node": "2:101", "name": "Mask group (Rectangle 18)" },
     "track-photo.jpg":   { "node": "2:97",  "name": "Sana Grillo-74 1" },
     "mask-track.svg":    { "node": "2:102", "name": "Rectangle 19" },

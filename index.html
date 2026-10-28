@@ -3,6 +3,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Only this site's own files may load, plus Cloudflare Turnstile (anti-bot)
+       and the Supabase entry endpoint. See SECURITY.md. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://challenges.cloudflare.com; style-src 'self'; img-src 'self' data:; font-src 'self' data:; connect-src 'self' https://*.supabase.co; frame-src https://challenges.cloudflare.com; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
   <!-- Pre-launch preview: keeps search engines out. Remove at launch. -->
   <meta name="robots" content="noindex, nofollow">
   <title>Win with ActiPH × HYROX UK | ActiPH Alkaline Ionised Water</title>
@@ -15,27 +19,11 @@
   <link rel="preload" href="assets/fonts/PragmaticaExtended-Bold.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="assets/fonts/Pragmatica-Book.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="assets/css/styles.css">
-  <script>
-    (function (d) {
-      // Fonts can't load from disk (file://), so use the inlined copy there.
-      if (location.protocol === "file:") {
-        var link = d.createElement("link");
-        link.rel = "stylesheet";
-        link.href = "assets/css/fonts-inline.css";
-        d.head.appendChild(link);
-      }
-      // Hide the hero until the intro animation starts; never longer than 3s.
-      if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
-        var root = d.documentElement;
-        root.classList.add("intro-pending");
-        setTimeout(function () { root.classList.remove("intro-pending"); }, 3000);
-      }
-    })(document);
-  </script>
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/boot.js"></script>
   <script src="assets/vendor/gsap.min.js" defer></script>
   <script src="assets/vendor/ScrollTrigger.min.js" defer></script>
   <script src="assets/vendor/lenis.min.js" defer></script>
-  <script src="assets/js/config.js" defer></script>
   <script src="assets/js/motion.js" defer></script>
   <script src="assets/js/main.js" defer></script>
 </head>
@@ -44,10 +32,10 @@
 
     <!-- Hero -->
     <section class="hero" aria-labelledby="hero-title">
-      <img class="hero__photo" src="assets/img/hero-group-1341.webp"
-           srcset="assets/img/hero-group-700.webp 700w, assets/img/hero-group-1341.webp 1341w"
-           sizes="(min-width: 1920px) 1341px, (min-width: 1288px) 70vw, (min-width: 924px) 900px, calc(100vw - 24px)"
-           width="1341" height="1994" alt="" fetchpriority="high">
+      <img class="hero__photo" src="assets/img/hero-model-1869.webp"
+           srcset="assets/img/hero-model-1000.webp 1000w, assets/img/hero-model-1869.webp 1869w"
+           sizes="(min-width: 1920px) 1339px, (min-width: 1288px) 70vw, (min-width: 924px) 900px, calc(100vw - 24px)"
+           width="1869" height="2228" alt="" fetchpriority="high">
 
       <header class="hero__header">
         <img class="hero__logo" src="assets/img/actiph-logo-420.webp"
@@ -72,7 +60,20 @@
         <li>x3 3 months’ worth of ActiPH</li>
       </ul>
       <div class="hero__cta-wrap">
-        <button class="btn btn--purple hero__cta" type="button" data-open-entry>Enter Code</button>
+        <button class="btn btn--purple hero__cta" type="button" data-open-entry data-when="open">Enter Code</button>
+
+        <div class="countdown" data-when="upcoming">
+          <p class="countdown__label" id="countdown-label">Entries open in</p>
+          <div class="countdown__units" role="timer" aria-labelledby="countdown-label">
+            <span class="countdown__unit"><span class="countdown__num" data-unit="days">00</span><span class="countdown__name">days</span></span>
+            <span class="countdown__unit"><span class="countdown__num" data-unit="hours">00</span><span class="countdown__name">hours</span></span>
+            <span class="countdown__unit"><span class="countdown__num" data-unit="minutes">00</span><span class="countdown__name">mins</span></span>
+            <span class="countdown__unit"><span class="countdown__num" data-unit="seconds">00</span><span class="countdown__name">secs</span></span>
+          </div>
+          <p class="countdown__date">1 December 2026</p>
+        </div>
+
+        <button class="hero__closed" type="button" data-when="closed" data-open-entry>Competition closed</button>
       </div>
 
       <img class="hero__bottle" src="assets/img/bottle-side-1400.webp"
@@ -99,7 +100,7 @@
               <img src="assets/img/prize-hyrox-600.webp"
                    srcset="assets/img/prize-hyrox-600.webp 600w, assets/img/prize-hyrox-1100.webp 1100w"
                    sizes="(min-width: 1920px) 544px, (min-width: 600px) 40vw, 420px"
-                   width="2400" height="1598" alt="" loading="lazy" style="object-position: 40.8% 50%">
+                   width="2400" height="1598" alt="" loading="lazy" class="prize__img--hyrox">
             </div>
             <p class="prize__label">Tickets to Hyrox UK<br>Glasgow | Cardiff *</p>
           </li>
@@ -244,6 +245,7 @@
         <p class="field__error" id="f-terms-err"></p>
       </div>
 
+      <div class="entry__captcha" hidden></div>
       <p class="entry__status" role="alert" aria-live="assertive"></p>
       <button class="btn btn--purple entry__submit" type="submit">
         <span class="entry__spinner" aria-hidden="true"></span>
@@ -256,6 +258,20 @@
       <p class="entry__done-title">Code entered!</p>
       <p class="entry__done-text"></p>
       <button class="btn btn--purple" type="button" data-close-entry>Done</button>
+    </div>
+  </dialog>
+
+  <!-- "Opening soon" / "Competition closed" notice; text set by main.js. -->
+  <dialog class="entry notice" id="notice" aria-labelledby="notice-title" data-lenis-prevent>
+    <div class="entry__head">
+      <h2 class="entry__title" id="notice-title"></h2>
+      <button class="entry__close" type="button" data-close-notice aria-label="Close">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="notice__body">
+      <p class="notice__text"></p>
+      <button class="btn btn--purple notice__ok" type="button" data-close-notice>OK</button>
     </div>
   </dialog>
 </body>

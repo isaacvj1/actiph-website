@@ -22,11 +22,34 @@ webp() {
   done
 }
 
-# The hero model is its whole Figma mask group with the fade and the designer's
-# Noise effect (grain) baked in; see "Hero grain" in README.md.
-for w in 700 1341; do
-  cwebp -quiet -q 78 -m 6 -alpha_q 100 -resize "$w" 0 "$SRC/hero-group.png" -o "$IMG/hero-group-$w.webp"
+# Hero model: Figma "Mask group" 37:15. The photo (37:2, a 1957 x 2934 box at
+# frame x 115, y -642) is clipped to Rectangle 22 (1339 x 1596 at 292, 196) and
+# faded by Rectangle 21's gradient (rect at y 159; opaque to 31.94% of 1597px,
+# transparent at 100%). Figma's PNG export flattens transparency onto grey, so
+# the masks are applied here instead, at the photo's native resolution.
+TMP="$(mktemp -d)"
+python3 - "$SRC/hero-model-photo.png" "$TMP/hero-model.png" <<'PY'
+import sys
+import numpy as np
+from PIL import Image
+src, out = sys.argv[1], sys.argv[2]
+photo = Image.open(src).convert("RGBA")
+sx, sy = photo.width / 1957, photo.height / 2934           # source px per design px
+box = (177 * sx, 838 * sy, (177 + 1339) * sx, (838 + 1596) * sy)  # Rectangle 22 in photo px
+w, h = round(1339 * sx), round(1596 * sy)
+crop = photo.transform((w, h), Image.EXTENT, box, Image.BICUBIC)
+y = (np.arange(h) + 0.5) / h * 1596 + (196 - 159)          # design px from Rectangle 21's top
+t = y / 1597
+fade = np.clip(1 - (t - 0.319387) / (1 - 0.319387), 0, 1)
+rgba = np.asarray(crop).astype(np.float32)
+rgba[..., 3] *= fade[:, None]
+Image.fromarray(rgba.round().astype(np.uint8), "RGBA").save(out)
+print(f"hero-model.png {w} x {h}")
+PY
+for w in 1000 1869; do
+  cwebp -quiet -q 82 -m 6 -alpha_q 100 -resize "$w" 0 "$TMP/hero-model.png" -o "$IMG/hero-model-$w.webp"
 done
+rm -rf "$TMP"
 webp track-photo.jpg   track-photo   800 1400 2305
 webp bottle-side.png   bottle-side   800 1400 2800
 webp bottle-front.png  bottle-front  500 900 1539
@@ -36,6 +59,7 @@ webp prize-airpods.png prize-airpods 500 768
 webp actiph-logo.png   actiph-logo   420 640
 
 cp "$SRC"/*.svg "$IMG/"
+rm -f "$IMG"/hero-model-mask-*.svg   # reference copies of Figma's masks; applied above
 
 # Latin + Latin Extended-A (covers Maltese ċ ġ ħ ż) and common punctuation.
 UNICODES="U+0000-017F,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD"

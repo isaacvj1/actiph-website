@@ -3,6 +3,7 @@
   const isPreview = !config.entryEndpoint;
   const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const easeOut = "cubic-bezier(0.23, 1, 0.32, 1)";
+  const root = document.documentElement;
 
   const dialog = document.getElementById("entry");
   const form = dialog.querySelector(".entry__form");
@@ -18,19 +19,99 @@
     invalid_code: "We couldn't find that code. Check the sticker on your bottle and try again.",
     code_used: "That code has already been entered.",
     invalid_input: "Some details look wrong. Please check the form and try again.",
+    captcha: "Please complete the security check and try again.",
     rate_limited: "Too many attempts. Please wait a few minutes and try again.",
     closed: "Entries for this promotion are now closed.",
+    not_open: "Entries haven't opened yet.",
     network: "We couldn't reach the server. Check your connection and try again.",
     default: "Something went wrong. Please try again.",
   };
 
-  // ---------- Open / close ----------
+  // ---------- Campaign state: upcoming → open → closed ----------
+  // boot.js sets the starting state on <html data-campaign>. These checks are
+  // for display only; the backend enforces the same dates.
+
+  const opensAt = Date.parse(config.opensAt);
+  const closesAt = Date.parse(config.closesAt);
+  const previewState = new URLSearchParams(location.search).get("preview");
+  const campaign = () => root.dataset.campaign;
+  const setCampaign = (state) => { root.dataset.campaign = state; };
+
+  const malta = (ms, options) => new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/Malta", ...options }).format(ms);
+  const longDate = (ms) => malta(ms, { day: "numeric", month: "long", year: "numeric" });
+  const time = (ms) => malta(ms, { hour: "2-digit", minute: "2-digit", hourCycle: "h23" });
+
+  const NOTICES = {
+    upcoming: {
+      title: "Opening soon",
+      text: `Entries open on ${longDate(opensAt)} at ${time(opensAt)} (Malta time). Keep your ActiPH bottle with its WIN sticker and come back then to enter your code.`,
+    },
+    closed: {
+      title: "Competition closed",
+      // closesAt is the first moment entries are refused, so show the day before it.
+      text: `The ActiPH × HYROX UK competition closed on ${longDate(closesAt - 1000)}. Thank you to everyone who took part. Winners will be contacted directly by phone or email.`,
+    },
+  };
+
+  const notice = document.getElementById("notice");
+  function showNotice(kind) {
+    const content = NOTICES[kind];
+    if (!content || notice.open) return;
+    if (dialog.open) dialog.close();
+    notice.querySelector(".entry__title").textContent = content.title;
+    notice.querySelector(".notice__text").textContent = content.text;
+    window.actiphLenis?.stop();
+    notice.showModal();
+    notice.querySelector(".notice__ok").focus();
+  }
+  notice.querySelectorAll("[data-close-notice]").forEach((el) => el.addEventListener("click", () => notice.close()));
+  notice.addEventListener("click", (event) => { if (event.target === notice) notice.close(); });
+  notice.addEventListener("close", () => window.actiphLenis?.start());
+
+  // Countdown until entries open.
+  document.querySelector(".countdown__date").textContent = longDate(opensAt);
+  const units = Object.fromEntries(
+    [...document.querySelectorAll(".countdown__num")].map((el) => [el.dataset.unit, el])
+  );
+  const pad = (n) => String(n).padStart(2, "0");
+
+  function tick() {
+    const now = Date.now();
+    if (campaign() === "upcoming") {
+      const left = Math.max(0, Math.floor((opensAt - now) / 1000));
+      units.days.textContent = pad(Math.floor(left / 86400));
+      units.hours.textContent = pad(Math.floor(left / 3600) % 24);
+      units.minutes.textContent = pad(Math.floor(left / 60) % 60);
+      units.seconds.textContent = pad(left % 60);
+      if (left === 0 && !previewState) setCampaign("open");
+    } else if (campaign() === "open" && now >= closesAt && !previewState) {
+      setCampaign("closed");
+      showNotice("closed");
+    }
+    setTimeout(tick, 1000 - (now % 1000) + 5);  // next whole second
+  }
+  tick();
+
+  // Tell visitors the competition is over, once per visit.
+  if (campaign() === "closed") {
+    let seen = false;
+    try { seen = sessionStorage.getItem("actiph-closed-seen") === "1"; } catch {}
+    if (!seen || previewState) showNotice("closed");
+    try { sessionStorage.setItem("actiph-closed-seen", "1"); } catch {}
+  }
+
+  // ---------- Entry form: open / close ----------
 
   function openEntry() {
+    if (campaign() !== "open") {
+      showNotice(campaign());
+      return;
+    }
     if (dialog.open) return;
     showForm();
     window.actiphLenis?.stop();
     dialog.showModal();
+    loadCaptcha();
     form.elements.code.focus();
   }
 
@@ -71,6 +152,40 @@
   window.addEventListener("hashchange", () => {
     if (location.hash === "#enter") openEntry();
   });
+
+  // ---------- Anti-bot check (Cloudflare Turnstile) ----------
+  // Only used when a site key is set and the backend is connected.
+
+  const captchaBox = form.querySelector(".entry__captcha");
+  const useCaptcha = Boolean(config.turnstileSiteKey) && !isPreview;
+  let captchaRequested = false;
+  let captchaWidget = null;
+  let captchaToken = "";
+
+  function loadCaptcha() {
+    if (!useCaptcha || captchaRequested) return;
+    captchaRequested = true;
+    captchaBox.hidden = false;
+    const render = () => {
+      captchaWidget = window.turnstile.render(captchaBox, {
+        sitekey: config.turnstileSiteKey,
+        theme: "light",
+        callback: (token) => { captchaToken = token; },
+        "expired-callback": () => { captchaToken = ""; },
+        "error-callback": () => { captchaToken = ""; },
+      });
+    };
+    const script = document.createElement("script");
+    script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+    script.async = true;
+    script.onload = render;
+    document.head.appendChild(script);
+  }
+
+  function resetCaptcha() {
+    if (captchaWidget !== null) window.turnstile.reset(captchaWidget);
+    captchaToken = "";
+  }
 
   // ---------- Validation ----------
 
@@ -132,10 +247,20 @@
     event.preventDefault();
     status.textContent = "";
 
+    if (campaign() !== "open") {
+      showNotice(campaign());
+      return;
+    }
+
     const firstInvalid = validate();
     if (firstInvalid) {
       firstInvalid.focus();
       shake(firstInvalid);
+      return;
+    }
+
+    if (useCaptcha && !captchaToken) {
+      status.textContent = ERRORS.captcha;
       return;
     }
 
@@ -148,6 +273,7 @@
       sportOther: form.elements.sport.value === "Other" ? form.elements.sportOther.value.trim() : "",
       terms: true,
       website: form.elements.website.value, // honeypot: real people leave this empty
+      turnstileToken: captchaToken,
     };
 
     submit.setAttribute("aria-busy", "true");
@@ -174,9 +300,11 @@
             codeInput.focus();
             shake(codeInput);
           }
+          if (result.error === "closed" && !previewState) setCampaign("closed");
         }
       }
     } finally {
+      if (useCaptcha) resetCaptcha();  // each token is single-use
       submit.removeAttribute("aria-busy");
       submit.disabled = false;
     }
@@ -188,9 +316,11 @@
     try {
       const response = await fetch(config.entryEndpoint, {
         method: "POST",
-        headers: { "Content-Type": "application/json", ...(config.entryHeaders || {}) },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
         signal: controller.signal,
+        credentials: "omit",
+        referrerPolicy: "no-referrer",
       });
       const body = await response.json().catch(() => ({}));
       if (response.ok && body.ok) return { ok: true };

@@ -9,6 +9,7 @@ How entrants' personal data is protected, what was tested, and what has to be do
 - The only way in is one server function. It accepts nothing but a well-formed entry from the promotion's own website during the competition dates. It also has to pass Cloudflare's anti-bot check and stay within strict attempt limits.
 - Only VJSCL staff with Supabase accounts (two-factor login required) can see entries, through the Supabase dashboard.
 - Data is stored in the EU, raw IP addresses are never stored, and entries are deleted automatically after the retention period.
+- The winner draw runs inside the database, so entrants' details never have to be exported to a spreadsheet.
 
 ## How it fits together
 
@@ -24,7 +25,7 @@ Visitor's browser ──HTTPS──▶ Website (static files)
                                  promo schema: codes, entries, attempts, settings
                                  (not exposed to the API; RLS on, no policies)
 
-VJSCL staff ──Supabase dashboard (2FA)──▶ promo.entries  (read, export for the draw)
+VJSCL staff ──Supabase dashboard (2FA)──▶ promo.entries  (read; run the draw with promo.draw_winners())
 ```
 
 ## Controls
@@ -53,13 +54,14 @@ VJSCL staff ──Supabase dashboard (2FA)──▶ promo.entries  (read, export
   - per device: 5 wrong codes in 15 minutes, or 40 attempts in a day;
   - site-wide: 300 wrong codes in 10 minutes. This applies because IP addresses can be faked.
   - The limits live in `promo.settings`.
+- The winner draw, `promo.draw_winners()`, works only after closing and only once, and only staff can run it. The result is kept in `promo.draw_results`.
 - New objects in the public schema are not exposed automatically (`auto_expose_new_tables = false`).
 - Retention:
   - a nightly job deletes entries 6 months after closing, unless they won or agreed to marketing;
   - people who agreed to marketing are kept until they unsubscribe. Their entry records the tick-box wording they saw and when they agreed, as proof of consent;
   - it deletes attempt records after 30 days.
 
-## Tested (locally, 28 Oct 2026)
+## Tested (locally, 28 and 29 Oct 2026)
 
 | Attack or check | Result |
 | --- | --- |
@@ -77,6 +79,12 @@ VJSCL staff ──Supabase dashboard (2FA)──▶ promo.entries  (read, export
 | IP-hash secret or Turnstile key missing | Function refuses everything |
 | Stored data | No raw IPs; IP hashes are 64-character HMACs |
 | Full entry through the website form | Saved correctly, with the confirmation shown |
+| Winner draw before closing, or a second time | Refused |
+| Draw from 15 people with 20 entries, some linked only through a chain of shared emails and phones | 12 different people every time, over 500 draws |
+| Prizes and winner flags after the draw | Prizes in draw order (clause 8.2); exactly the 6 winners flagged |
+| Fairness: 4,000 draws from 20 entries | Each entry drawn first 175 to 220 times (200 expected); passes a chi-square test |
+| Clean-up 6 months after closing | Keeps winners and marketing contacts, deletes the rest; the draw record keeps the codes |
+| Run the draw or read its results with the public key | No access |
 
 ## Before launch
 
@@ -103,9 +111,48 @@ VJSCL staff ──Supabase dashboard (2FA)──▶ promo.entries  (read, export
    - `turnstileSiteKey` to the Cloudflare site key.
 8. **Hosting.** Serve the site where the `_headers` file applies, point `actiph.vjscl.com.mt` at it, and remove the `noindex` tags from `index.html` and `terms.html`. Publish only the website files: `index.html`, `terms.html`, `404.html`, `robots.txt`, `sitemap.xml`, `favicon.ico`, `_headers` and `assets/`. Never publish `supabase/`, `scripts/` or the docs. The preview on GitHub Pages already leaves them out (see `_config.yml`).
 9. **Check in production:**
-   - make one test entry, then delete it;
+   - add a test code (`insert into promo.codes (code) values ('TEST-0001');`), enter it on the live site, then delete the entry and the code (`delete from promo.entries where code = 'TEST-0001'; delete from promo.codes where code = 'TEST-0001';`), so it can't end up in the draw;
    - confirm two different devices get different `ip_hash` values in `promo.attempts`;
    - confirm a request from another origin is refused.
 10. **Sticker codes.** If they aren't printed yet, use at least 8 random characters. With 5 characters there are about 60 million possible codes, which makes guessing more practical than it should be.
 
 Never share the service role key, the database password or `IP_HASH_SECRET`. If one leaks, rotate it in Supabase straight away.
+
+## After closing
+
+All of these run in the Supabase SQL editor.
+
+**The draw** (within 10 working days of closing, clause 8.1). With the independent supervisor watching, run:
+
+```sql
+select * from promo.draw_winners();
+```
+
+- It works only after the closing date, and only once. The result is saved in `promo.draw_results` as the record of the draw.
+- Positions 1 to 6 are the winners, with prizes in draw order: AirPods, then the two HYROX tickets, then the three ActiPH prizes. Positions 7 to 12 are the reserves, in order.
+- Entries that share an email or phone number count as one person, so nobody is drawn twice (clause 8.3). The message above the results says how many entries and people were in the draw.
+- Winners are marked so the nightly clean-up keeps their details. If a winner loses their prize and a reserve takes it (clause 9.2), mark that reserve too:
+  ```sql
+  update promo.entries set is_winner = true
+   where id = (select entry_id from promo.draw_results where draw_position = 7);  -- 7 = first reserve
+  ```
+
+**Marketing list.** People who ticked the marketing box:
+
+```sql
+select full_name, email, phone, marketing_consent_at from promo.entries where marketing_consent;
+```
+
+Load the download into the marketing tool, then delete the file.
+
+**Unsubscribe requests.**
+
+```sql
+update promo.entries
+   set marketing_consent = false, marketing_consent_at = null, marketing_consent_wording = null
+ where email = lower('person@example.com');
+```
+
+The nightly clean-up then deletes their entries once the 6 months after closing have passed, unless they won.
+
+**Requests to see or delete personal data.** Find the person with `select * from promo.entries where email = lower('person@example.com');` and delete with `delete from promo.entries where email = lower('person@example.com');`. Their codes stay marked as used.

@@ -564,6 +564,7 @@ html:not([data-campaign="closed"]) [data-when="closed"] { display: none !importa
   }
   .prize__card { border-radius: 28px; }
   .prize:nth-child(2) { margin-top: 56px; }   /* room for the AirPods popping out of the card */
+  .prize__label { letter-spacing: -.03em; }   /* Figma's -.05em runs words together at 16px */
 
   .steps {
     grid-template-columns: 1fr;

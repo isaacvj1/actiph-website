@@ -55,7 +55,8 @@ VJSCL staff ──Supabase dashboard (2FA)──▶ promo.entries  (read, export
   - The limits live in `promo.settings`.
 - New objects in the public schema are not exposed automatically (`auto_expose_new_tables = false`).
 - Retention:
-  - a nightly job deletes non-winning entries 6 months after closing;
+  - a nightly job deletes entries 6 months after closing, unless they won or agreed to marketing;
+  - people who agreed to marketing are kept until they unsubscribe. Their entry records the tick-box wording they saw and when they agreed, as proof of consent;
   - it deletes attempt records after 30 days.
 
 ## Tested (locally, 28 Oct 2026)

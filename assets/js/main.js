@@ -271,6 +271,7 @@
       phone: form.elements.phone.value.trim(),
       sport: form.elements.sport.value,
       sportOther: form.elements.sport.value === "Other" ? form.elements.sportOther.value.trim() : "",
+      marketing: form.elements.marketing.checked,  // optional, unticked by default
       terms: true,
       website: form.elements.website.value, // honeypot: real people leave this empty
       turnstileToken: captchaToken,

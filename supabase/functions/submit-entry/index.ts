@@ -81,7 +81,8 @@ function parseEntry(raw: Record<string, unknown>) {
     sportOther !== null && (sport === "Other" ? sportOther.length >= 2 : sportOther === "") &&
     raw.terms === true &&
     raw.website === "";  // honeypot: real people never fill it in
-  return ok ? { code, name, email, phone, sport, sportOther } : null;
+  const marketing = raw.marketing === true;  // optional; anything but true means no
+  return ok ? { code, name, email, phone, sport, sportOther, marketing } : null;
 }
 
 async function hashIp(ip: string): Promise<string> {
@@ -152,6 +153,7 @@ Deno.serve(async (req) => {
     p_sport: entry.sport,
     p_sport_other: entry.sportOther,
     p_ip_hash: await hashIp(ip),
+    p_marketing: entry.marketing,
   });
   if (error) {
     console.error("submit-entry: database error", error.code);  // no personal data in logs

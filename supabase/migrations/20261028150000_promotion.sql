@@ -22,7 +22,10 @@ create table promo.settings (
   -- Site-wide brake on code guessing, since IP addresses can be faked.
   max_failed_global_per_10min integer not null default 300,
   entry_retention interval not null default interval '6 months',
-  attempt_retention interval not null default interval '30 days'
+  attempt_retention interval not null default interval '30 days',
+  -- Exact wording of the optional marketing tick box on the entry form, saved
+  -- with each consent as proof. Update it if the form's wording changes.
+  marketing_wording text not null default 'Keep me updated with ActiPH news and offers by email and SMS (optional). You can unsubscribe at any time.'
 );
 -- Malta time (CET, UTC+1): entries 1 Dec 2026 00:00 to 31 Jan 2027 23:59:59.
 insert into promo.settings (opens_at, closes_at)
@@ -44,6 +47,11 @@ create table promo.entries (
   phone text not null check (char_length(phone) between 8 and 20 and phone ~ '^[+0-9 ()-]+$'),
   sport text not null check (char_length(sport) between 1 and 60),
   sport_other text check (sport_other is null or char_length(sport_other) between 2 and 60),
+  -- Marketing consent (optional tick box): when given and the wording shown.
+  marketing_consent boolean not null default false,
+  marketing_consent_at timestamptz,
+  marketing_consent_wording text,
+  check (marketing_consent = (marketing_consent_at is not null)),
   is_winner boolean not null default false,
   created_at timestamptz not null default now()
 );
@@ -78,7 +86,8 @@ create or replace function public.submit_entry(
   p_phone text,
   p_sport text,
   p_sport_other text,
-  p_ip_hash text
+  p_ip_hash text,
+  p_marketing boolean
 ) returns text
 language plpgsql
 security definer
@@ -142,8 +151,12 @@ begin
     return 'invalid_code';
   end if;
 
-  insert into promo.entries (code, full_name, email, phone, sport, sport_other)
-  values (v_code, v_name, v_email, v_phone, v_sport, v_sport_other)
+  insert into promo.entries (code, full_name, email, phone, sport, sport_other,
+                             marketing_consent, marketing_consent_at, marketing_consent_wording)
+  values (v_code, v_name, v_email, v_phone, v_sport, v_sport_other,
+          coalesce(p_marketing, false),
+          case when p_marketing then now() end,
+          case when p_marketing then s.marketing_wording end)
   returning id into v_entry;
   update promo.codes set entry_id = v_entry where code = v_code;
   insert into promo.attempts (ip_hash, ok) values (p_ip_hash, true);
@@ -151,11 +164,12 @@ begin
 end;
 $$;
 
-revoke all on function public.submit_entry(text, text, text, text, text, text, text) from public, anon, authenticated;
-grant execute on function public.submit_entry(text, text, text, text, text, text, text) to service_role;
+revoke all on function public.submit_entry(text, text, text, text, text, text, text, boolean) from public, anon, authenticated;
+grant execute on function public.submit_entry(text, text, text, text, text, text, text, boolean) to service_role;
 
--- Data retention (Privacy Notice clause 17.5): delete non-winning entries once
--- the retention period after closing has passed, and old attempt records.
+-- Data retention (Privacy Notice clause 17.5): once the retention period after
+-- closing has passed, delete entries that neither won nor agreed to marketing,
+-- and old attempt records. Marketing contacts stay until they unsubscribe.
 create or replace function promo.purge_expired()
 returns void
 language sql
@@ -164,7 +178,8 @@ set search_path = ''
 as $$
   delete from promo.entries e
    using promo.settings s
-   where s.id and not e.is_winner and now() > s.closes_at + s.entry_retention;
+   where s.id and not e.is_winner and not e.marketing_consent
+     and now() > s.closes_at + s.entry_retention;
   delete from promo.attempts a
    using promo.settings s
    where s.id and a.created_at < now() - s.attempt_retention;

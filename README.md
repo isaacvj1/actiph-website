@@ -72,10 +72,10 @@ The form sends `POST <entryEndpoint>` with this JSON body:
 
 ```json
 { "code": "AB12C", "name": "Maria Borg", "email": "maria@example.com", "phone": "+356 9912 3456",
-  "sport": "Running", "sportOther": "", "terms": true, "website": "", "turnstileToken": "..." }
+  "sport": "Running", "sportOther": "", "marketing": false, "terms": true, "website": "", "turnstileToken": "..." }
 ```
 
-`sport` is one of the dropdown options in `index.html` (the function has the same list). When it is `"Other"`, `sportOther` holds what the person typed; otherwise it is empty. `website` is a hidden honeypot field.
+`sport` is one of the dropdown options in `index.html` (the function has the same list). When it is `"Other"`, `sportOther` holds what the person typed; otherwise it is empty. `marketing` is the optional, unticked-by-default consent to ActiPH news and offers. `website` is a hidden honeypot field.
 
 The function answers `{ "ok": true }` or `{ "ok": false, "error": "<reason>" }`, where `<reason>` is one of `invalid_code`, `code_used`, `invalid_input`, `captcha`, `rate_limited`, `not_open`, `closed` or `default`.
 

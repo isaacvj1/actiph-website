@@ -8,18 +8,28 @@ It's plain HTML, CSS and JavaScript with no build step, so it can be hosted anyw
 
 ```
 index.html            the campaign page
-terms.html            Terms & Conditions (placeholder until the approved text is supplied)
+terms.html            Terms & Conditions and Privacy Notice (draft; highlighted items to confirm)
 assets/css/styles.css all styles
 assets/css/fonts-inline.css  Pragmatica inlined, loaded only when the page is opened from disk
-assets/js/config.js   entry backend settings
-assets/js/main.js     entry form behaviour
+assets/js/config.js   competition dates, entry endpoint and Turnstile site key (all public)
+assets/js/boot.js     runs before first paint: campaign state, file:// fonts, intro styles
+assets/js/main.js     countdown, closed popup and entry form
 assets/js/motion.js   smooth scrolling, hero intro and scroll animations
 assets/vendor/        GSAP 3.15.0 + ScrollTrigger (GSAP standard licence), Lenis 1.3.26 (MIT)
 assets/img/           web-optimised images generated from Figma exports
 assets/fonts/         Pragmatica web fonts (WOFF2, Latin subset)
 figma-assets/         original Figma exports (only manifest.json is committed)
 scripts/build-assets.sh  regenerates assets/img and assets/fonts
+supabase/             entry backend: database migration and the submit-entry function
+SECURITY.md           how entrants' data is protected, what was tested, launch checklist
+_headers              security headers for the production host
 ```
+
+## Competition dates
+
+The dates are in `assets/js/config.js` and, for the server, in `promo.settings` (see the migration). Before `opensAt` (1 December 2026, 00:00 Malta time) the hero shows a countdown instead of Enter Code. From `closesAt` (1 February 2027, 00:00) it shows "Competition closed" and a popup, once per visit. The page switches between states on its own while it's open.
+
+To review a state before its date, add `?preview=upcoming`, `?preview=open` or `?preview=closed` to the URL. This changes only what the page shows; the server still enforces the real dates.
 
 ## Preview locally
 
@@ -54,33 +64,26 @@ The model is Figma's "Mask group" 37:15: the photo `claire azzopardi-39 1` (node
 
 ## Connecting the entry backend
 
-The "Enter Code" form currently runs in **preview mode**: it validates input and shows a confirmation screen, but saves nothing. To go live, set `entryEndpoint` (and any `entryHeaders`, such as an API key) in `assets/js/config.js`.
+The "Enter Code" form runs in **preview mode** until `entryEndpoint` is set in `assets/js/config.js`: it validates input and shows a confirmation screen, but saves nothing.
+
+The backend is in `supabase/`: a database migration and the `submit-entry` Edge Function. `SECURITY.md` explains how it protects the data and lists the deployment steps.
 
 The form sends `POST <entryEndpoint>` with this JSON body:
 
 ```json
 { "code": "AB12C", "name": "Maria Borg", "email": "maria@example.com", "phone": "+356 9912 3456",
-  "sport": "Running", "sportOther": "", "terms": true, "website": "" }
+  "sport": "Running", "sportOther": "", "terms": true, "website": "", "turnstileToken": "..." }
 ```
 
-`sport` is one of the dropdown options in `index.html`. When it is `"Other"`, `sportOther` holds what the person typed; otherwise it is empty.
+`sport` is one of the dropdown options in `index.html` (the function has the same list). When it is `"Other"`, `sportOther` holds what the person typed; otherwise it is empty. `website` is a hidden honeypot field.
 
-The backend must respond with JSON:
+The function answers `{ "ok": true }` or `{ "ok": false, "error": "<reason>" }`, where `<reason>` is one of `invalid_code`, `code_used`, `invalid_input`, `captcha`, `rate_limited`, `not_open`, `closed` or `default`.
 
-- `{ "ok": true }` when the entry is accepted
-- `{ "ok": false, "error": "<reason>" }` otherwise, where `<reason>` is one of `invalid_code`, `code_used`, `invalid_input`, `rate_limited` or `closed` (anything else shows a generic error)
-
-The backend must:
-
-- check the code against the list of codes printed on the stickers (case-insensitive) and mark it used in the same transaction, so a code can only be entered once
-- never send the code list to the browser
-- reject the request if the `website` honeypot field is not empty
-- rate-limit attempts per IP address, because short codes can otherwise be guessed by trial and error
-- store each entry with a timestamp, so entries can be exported for the draw or prize claims
-- allow the site's domain via CORS
+To run the backend locally (needs Docker and the Supabase CLI): `supabase start`, add test codes to `promo.codes`, put `ALLOWED_ORIGINS`, `IP_HASH_SECRET` and `ALLOW_NO_CAPTCHA=true` in `supabase/functions/.env.local`, then `supabase functions serve --env-file supabase/functions/.env.local`. The local ports are 554xx so they don't clash with other local Supabase projects.
 
 ## Before launch
 
+- Follow the launch checklist in `SECURITY.md` (Supabase project, codes, Turnstile, secrets, hosting with security headers).
 - Confirm every highlighted item in `terms.html` (`<mark class="tbc">`), then remove the highlights and the draft notice. Have the Terms and Privacy Notice reviewed legally before launch.
 - Confirm VJSCL's Pragmatica licence covers web use. ParaType sells web licences separately from desktop licences.
 - Confirm the licence for the Getty image used on the HYROX tickets card covers web use.

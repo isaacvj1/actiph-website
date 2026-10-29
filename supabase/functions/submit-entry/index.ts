@@ -21,9 +21,9 @@ const MAX_BODY_BYTES = 4096;
 
 // Must match the <option>s in index.html.
 const SPORTS = new Set([
-  "Running", "Gym / weight training", "HYROX / functional fitness", "CrossFit",
-  "Cycling", "Swimming", "Football", "Other team sport", "Yoga / Pilates",
-  "Combat sports", "Walking / hiking", "Other", "I don't practise a sport",
+  "Running", "Gym / Weight Training", "HYROX / Functional Fitness", "CrossFit",
+  "Cycling", "Swimming", "Football", "Other Team Sport", "Yoga / Pilates",
+  "Combat Sports", "Walking / Hiking", "Other",
 ]);
 
 const STATUS: Record<string, number> = {

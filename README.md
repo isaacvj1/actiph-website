@@ -9,6 +9,10 @@ It's plain HTML, CSS and JavaScript with no build step, so it can be hosted anyw
 ```
 index.html            the campaign page
 terms.html            Terms & Conditions and Privacy Notice (draft; highlighted items to confirm)
+404.html              shown for any address that doesn't exist
+robots.txt, sitemap.xml  for search engines (take effect at the real domain)
+favicon.ico           browser tab icon (more sizes in assets/img)
+_config.yml           tells GitHub Pages to publish only the website, not the project files
 assets/css/styles.css all styles
 assets/css/fonts-inline.css  Pragmatica inlined, loaded only when the page is opened from disk
 assets/js/config.js   competition dates, entry endpoint and Turnstile site key (all public)
@@ -19,7 +23,8 @@ assets/vendor/        GSAP 3.15.0 + ScrollTrigger (GSAP standard licence), Lenis
 assets/img/           web-optimised images generated from Figma exports
 assets/fonts/         Pragmatica web fonts (WOFF2, Latin subset)
 figma-assets/         original Figma exports (only manifest.json is committed)
-scripts/build-assets.sh  regenerates assets/img and assets/fonts
+scripts/build-assets.sh  regenerates assets/img (including the favicons) and assets/fonts
+scripts/social-card.html source of assets/img/social-card.jpg, the image shown when the link is shared
 supabase/             entry backend: database migration and the submit-entry function
 SECURITY.md           how entrants' data is protected, what was tested, launch checklist
 _headers              security headers for the production host
@@ -83,6 +88,12 @@ To run the backend locally (needs Docker and the Supabase CLI): `supabase start`
 
 ## Before launch
 
+- Point the domain printed on the stickers, `actiph.vjscl.com.mt`, at the host. It doesn't resolve yet, so anyone typing it from a sticker today gets an error.
+- Swap the preview address for the real one in the canonical links, share-image links, 404 page, robots.txt and sitemap:
+  ```sh
+  grep -rl 'https://isaacvj1.github.io/actiph-website/' index.html terms.html 404.html robots.txt sitemap.xml \
+    | xargs sed -i '' 's#https://isaacvj1.github.io/actiph-website/#https://actiph.vjscl.com.mt/#g'
+  ```
 - Follow the launch checklist in `SECURITY.md` (Supabase project, codes, Turnstile, secrets, hosting with security headers).
 - Confirm every highlighted item in `terms.html` (`<mark class="tbc">`), then remove the highlights and the draft notice. Have the Terms and Privacy Notice reviewed legally before launch.
 - Confirm VJSCL's Pragmatica licence covers web use. ParaType sells web licences separately from desktop licences.

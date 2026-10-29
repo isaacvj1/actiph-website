@@ -1,0 +1,8 @@
+# GitHub Pages settings: publish the website only, not the project files.
+# (Files starting with "_" or "." are never published.)
+exclude:
+  - README.md
+  - SECURITY.md
+  - scripts/
+  - supabase/
+  - figma-assets/

@@ -101,7 +101,7 @@ VJSCL staff ──Supabase dashboard (2FA)──▶ promo.entries  (read, export
 7. **Website settings.** In `assets/js/config.js`, set:
    - `entryEndpoint` to `https://<ref>.supabase.co/functions/v1/submit-entry`
    - `turnstileSiteKey` to the Cloudflare site key.
-8. **Hosting.** Serve the site where the `_headers` file applies, point `actiph.vjscl.com.mt` at it, and remove the `noindex` tags.
+8. **Hosting.** Serve the site where the `_headers` file applies, point `actiph.vjscl.com.mt` at it, and remove the `noindex` tags from `index.html` and `terms.html`. Publish only the website files: `index.html`, `terms.html`, `404.html`, `robots.txt`, `sitemap.xml`, `favicon.ico`, `_headers` and `assets/`. Never publish `supabase/`, `scripts/` or the docs. The preview on GitHub Pages already leaves them out (see `_config.yml`).
 9. **Check in production:**
    - make one test entry, then delete it;
    - confirm two different devices get different `ip_hash` values in `promo.attempts`;

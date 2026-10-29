@@ -1,0 +1,50 @@
+<!doctype html>
+<!-- Source of assets/img/social-card.jpg, the 1200 x 630 image shown when the
+     site is shared (WhatsApp, Facebook, LinkedIn, iMessage...). To regenerate:
+     serve the repo (python3 -m http.server 8765), open
+     http://localhost:8765/scripts/social-card.html at exactly 1200 x 630 and
+     screenshot the page. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Social card</title>
+<link rel="stylesheet" href="../assets/css/styles.css">
+<style>
+  html, body { margin: 0; width: 1200px; height: 630px; overflow: hidden; }
+  body {
+    position: relative;
+    background: linear-gradient(182.07deg, var(--blue) 0%, var(--blue-light) 37.391%, var(--blue) 83.598%);
+    color: #fff;
+    font-family: var(--font);
+  }
+  .sc-photo { position: absolute; left: 470px; top: -40px; width: 860px; }
+  .sc-bottle { position: absolute; left: 560px; top: 448px; width: 560px; filter: drop-shadow(0 18px 16px rgba(20, 40, 50, .25)); }
+  .sc-copy { position: absolute; left: 72px; top: 64px; width: 420px; text-align: center; }
+  .sc-logo { display: block; width: 230px; margin: 0 auto; }
+  .sc-win { margin: 54px 0 0; font-family: var(--font-ext); font-weight: 700; font-size: 188px; line-height: .62; }
+  .sc-winners {
+    display: inline-block; margin-top: 40px; padding: 10px 26px; border-radius: 14px;
+    background: var(--purple); color: #fff; font-weight: 700; font-size: 26px; letter-spacing: .02em;
+  }
+  .sc-prizes { margin: 22px 0 0; padding: 0; list-style: none; color: var(--purple); font-size: 27px; line-height: 1.6; letter-spacing: -.02em; }
+  .sc-prizes li + li { border-top: 1px solid rgba(93, 42, 94, .25); }
+  .sc-hyrox { position: absolute; right: 48px; top: 48px; padding: 14px 26px; border-radius: 999px; background: #000; }
+  .sc-hyrox img { display: block; width: 200px; }
+</style>
+</head>
+<body>
+  <img class="sc-photo" src="../assets/img/hero-model-1869.webp" alt="">
+  <img class="sc-bottle" src="../assets/img/bottle-side-1400.webp" alt="">
+  <div class="sc-hyrox"><img src="../assets/img/hyrox-uk.svg" alt=""></div>
+  <div class="sc-copy">
+    <img class="sc-logo" src="../assets/img/actiph-logo-640.webp" alt="">
+    <p class="sc-win">WIN</p>
+    <p class="sc-winners">6 WINNERS</p>
+    <ul class="sc-prizes">
+      <li>x1 AirPods 5</li>
+      <li>x2 HYROX UK Tickets</li>
+      <li>x3 3 months’ worth of ActiPH</li>
+    </ul>
+  </div>
+</body>
+</html>

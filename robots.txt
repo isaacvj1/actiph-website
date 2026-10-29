@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://isaacvj1.github.io/actiph-website/sitemap.xml

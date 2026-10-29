@@ -125,7 +125,7 @@ ul, ol { padding: 0; list-style: none; }
 }
 .btn:active { transform: scale(.97); }
 .btn--purple { background: var(--purple); }
-.btn--blue { background: var(--blue); }
+.btn--blue { background: var(--blue); color: var(--purple); }
 
 @media (hover: hover) and (pointer: fine) {
   .btn:hover { transform: translateY(-2px); }
@@ -420,10 +420,6 @@ html:not([data-campaign="closed"]) [data-when="closed"] { display: none !importa
   from { transform: translateY(0) rotate(0deg); }
   to { transform: translateY(-3.5%) rotate(-1.5deg); }
 }
-@media (hover: hover) and (pointer: fine) {
-  .prize__card--photo img { transition: transform 700ms var(--ease-out); }
-  .prize:hover .prize__card--photo img { transform: scale(1.05); }
-}
 .prize__label {
   margin-top: max(10px, calc(25 * var(--u)));
   font-size: max(16px, calc(40 * var(--u)));
@@ -575,7 +571,7 @@ html:not([data-campaign="closed"]) [data-when="closed"] { display: none !importa
   }
   .step__text { line-height: 1.15; letter-spacing: -.03em; }
 
-  .how__note span { display: block; }
+  .how__note span { display: block; text-wrap: balance; }
   .how__note .how__sep { display: none; }
 
   .actions {
@@ -943,7 +939,6 @@ mark.tbc {
   .hero__hyrox:active { transform: none; }
   .hero__cta::after { display: none; }
   .prize__card--airpods img.is-floating { animation: none; }
-  .prize:hover .prize__card--photo img { transform: none; }
   .entry,
   .entry[open] { transform: none; }
   @starting-style {

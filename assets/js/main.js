@@ -147,12 +147,6 @@
     }
   });
 
-  // Links and QR codes can point straight at the form: actiph.vjscl.com.mt/#enter
-  if (location.hash === "#enter") openEntry();
-  window.addEventListener("hashchange", () => {
-    if (location.hash === "#enter") openEntry();
-  });
-
   // ---------- Anti-bot check (Cloudflare Turnstile) ----------
   // Only used when a site key is set and the backend is connected.
 
@@ -368,4 +362,11 @@
       { duration: 320, easing: "ease-out" }
     );
   }
+
+  // Links and QR codes can point straight at the form: actiph.vjscl.com.mt/#enter
+  // Runs last: opening the form uses the anti-bot and submit setup above.
+  if (location.hash === "#enter") openEntry();
+  window.addEventListener("hashchange", () => {
+    if (location.hash === "#enter") openEntry();
+  });
 })();

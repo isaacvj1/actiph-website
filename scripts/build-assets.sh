@@ -58,6 +58,32 @@ webp prize-actiph.png  prize-actiph  400 800
 webp prize-airpods.png prize-airpods 500 768
 webp actiph-logo.png   actiph-logo   420 640
 
+# Favicons: the water drop above the "i" in the logo, white on the brand purple.
+python3 - "$SRC/actiph-logo.png" "$ROOT" <<'PY'
+import sys
+import numpy as np
+from PIL import Image, ImageDraw
+logo, root = sys.argv[1], sys.argv[2]
+drop = np.asarray(Image.open(logo).convert("RGBA").crop((828, 31, 901, 146))).copy()  # drop + margin
+drop[..., :3] = 255
+drop = Image.fromarray(drop)
+
+def icon(size, radius):
+    W = size * 4  # draw large, then scale down for clean edges
+    out = Image.new("RGBA", (W, W), (0, 0, 0, 0))
+    mask = Image.new("L", (W, W), 0)
+    ImageDraw.Draw(mask).rounded_rectangle((0, 0, W - 1, W - 1), radius=int(W * radius), fill=255)
+    out.paste(Image.new("RGBA", (W, W), (93, 42, 94, 255)), (0, 0), mask)
+    h = int(W * 0.72); w = int(drop.width * h / drop.height)
+    out.alpha_composite(drop.resize((w, h), Image.LANCZOS), ((W - w) // 2, (W - h) // 2))
+    return out.resize((size, size), Image.LANCZOS)
+
+icon(48, 0.22).save(f"{root}/favicon.ico", sizes=[(16, 16), (32, 32), (48, 48)])
+icon(192, 0.22).save(f"{root}/assets/img/favicon-192.png", optimize=True)
+icon(180, 0).convert("RGB").save(f"{root}/assets/img/apple-touch-icon.png", optimize=True)  # iOS rounds the corners itself
+print("favicons built")
+PY
+
 cp "$SRC"/*.svg "$IMG/"
 rm -f "$IMG"/hero-model-mask-*.svg   # reference copies of Figma's masks; applied above
 
